@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0b3175">
-    <title>جدول المدرس (أوفلاين)</title>
+    <title>جدول المدرس</title>
+    <!-- خط Cairo ومكتبة الأيقونات -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', 'Tajawal', 'Segoe UI', Tahoma, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
         body { background-color: #0b3175; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; min-height: 100dvh; }
         .phone-container { width: 100%; max-width: 412px; background-color: #0b3175; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
 
         .header { padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center; }
-        .header-title { font-size: 23px; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .header-title { font-size: 24px; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .header-date { font-size: 12px; font-weight: 700; opacity: 0.9; text-align: center; margin-top: 2px; }
         .header-icon { font-size: 20px; color: white; background: none; border: none; cursor: pointer; }
-        .offline-pill { display: inline-flex; align-items: center; gap: 4px; background: rgba(16, 185, 129, 0.22); border: 1px solid rgba(110, 231, 183, 0.5); color: #a7f3d0; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 999px; margin-top: 4px; }
 
         /* شريط الأيام الأفقي */
         .days-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 0 16px 12px 16px; scrollbar-width: none; }
@@ -41,7 +42,7 @@
         .icon-blue   { background-color: #3b82f6; color: white; }
 
         .card-left { display: flex; align-items: center; gap: 12px; }
-        .icon-box { width: 48px; height: 48px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; flex-shrink: 0; }
+        .icon-box { width: 48px; height: 48px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; }
 
         .card-info .title { font-size: 16px; font-weight: 900; color: #1e293b; }
         .card-info .subtitle { font-size: 13px; font-weight: 800; color: #475569; margin-top: 1px; }
@@ -53,22 +54,39 @@
         .badge-purple { background-color: #8b5cf6; }
 
         /* Bottom Nav */
-        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 412px; background-color: white; border-top: 1px solid #e2e8f0; border-top-left-radius: 24px; border-top-right-radius: 24px; display: flex; justify-content: space-around; padding: 8px 2px 6px 2px; z-index: 100; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
+        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 412px; background-color: white; border-top: 1px solid #e2e8f0; border-top-left-radius: 24px; border-top-right-radius: 24px; display: flex; justify-content: space-around; padding: 10px 2px 6px 2px; z-index: 100; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
         .nav-item { display: flex; flex-direction: column; align-items: center; background: none; border: none; color: #94a3b8; font-size: 10px; font-weight: 800; cursor: pointer; gap: 2px; flex: 1; }
-        .nav-item .nav-ico { font-size: 16px; line-height: 1.1; }
+        .nav-item i { font-size: 16px; }
         .nav-item.active { color: #0b3175; }
 
         .view { display: none; }
         .view.active { display: block; }
 
+        /* تصميم ملء الشاشة لواجهة الأسئلة */
+        #view-exam-generator.active {
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 412px;
+            height: calc(100vh - 60px);
+            height: calc(100dvh - 60px);
+            z-index: 90;
+            background: #ffffff;
+            padding: 0;
+        }
+
         .settings-card { background: white; padding: 16px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 12px; }
         .section-title { font-size: 14px; font-weight: 900; color: #0b3175; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
         .input-group { margin-bottom: 10px; }
         .input-group label { display: block; font-size: 11px; font-weight: 800; color: #334155; margin-bottom: 4px; }
-        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-weight: 700; background: white; }
+        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Cairo'; font-size: 12px; font-weight: 700; background: white; }
         
         .btn-save { background: #0284c7; color: white; border: none; width: 100%; padding: 10px; border-radius: 10px; font-weight: 900; font-size: 14px; cursor: pointer; margin-top: 10px; }
-        .btn-bell { background: #eab308; color: white; border: none; width: 100%; padding: 8px; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; margin-bottom: 6px; }
+        .btn-bell { background: #eab308; color: white; border: none; width: 100%; padding: 8px; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; margin-bottom: 10px; }
         
         .exam-badge-daily { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; }
         .exam-badge-monthly { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; }
@@ -78,7 +96,7 @@
         .notification-rectangle.completed { background: #f0fdf4; border-right-color: #22c55e; opacity: 0.8; }
         .notification-rectangle.completed .notif-title { text-decoration: line-through; color: #64748b; }
 
-        .btn-check-task { background: #e2e8f0; color: #475569; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 14px; font-weight: 900; transition: 0.2s; }
+        .btn-check-task { background: #e2e8f0; color: #475569; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 14px; transition: 0.2s; }
         .btn-check-task.done { background: #22c55e; color: white; }
 
         /* Modal نافذة تفاصيل القاعة والدرجات بالعرض الكامل للهاتف */
@@ -96,12 +114,10 @@
         .grades-table th.th-f1 { background-color: #1d4ed8; }
         .grades-table th.th-mid { background-color: #7c3aed; }
         .grades-table th.th-f2 { background-color: #0f766e; }
-        .grades-table input { width: 38px; padding: 2px; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 10px; }
+        .grades-table input { width: 38px; padding: 2px; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 10px; font-family: 'Cairo'; }
         .grades-table input.month-calc { background-color: #f8fafc; font-weight: 800; color: #1e293b; border-color: #94a3b8; }
         .grades-table input.saei-calc { background-color: #f0f9ff; font-weight: 900; color: #0369a1; border-color: #7dd3fc; }
         .grades-table td:first-child input { width: 120px; text-align: right; font-weight: 800; }
-
-        .q-item-card { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px; margin-bottom: 8px; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -109,13 +125,12 @@
     <div class="phone-container">
         <!-- Header -->
         <header class="header" id="main-header">
-            <button class="header-icon" onclick="switchView('notifications')" title="التنبيهات">🔔</button>
-            <div style="text-align: center;">
-                <div class="header-title">📅 جدول المدرس</div>
+            <button class="header-icon" onclick="switchView('notifications')" title="التنبيهات"><i class="fa-solid fa-bell"></i></button>
+            <div>
+                <div class="header-title"><i class="fa-solid fa-calendar-days"></i> جدول المدرس</div>
                 <div class="header-date" id="teacher-header-subtitle">المدرس: الأستاذ شبر • المادة: الكيمياء</div>
-                <div class="offline-pill">● يعمل أوفلاين بالكامل</div>
             </div>
-            <button class="header-icon" onclick="switchView('settings')" title="الإعدادات">⚙️</button>
+            <button class="header-icon" onclick="switchView('settings')" title="الإعدادات"><i class="fa-solid fa-gear"></i></button>
         </header>
 
         <!-- Days Selector Bar -->
@@ -136,7 +151,7 @@
             <!-- View 2: Settings -->
             <div id="view-settings" class="view">
                 <div class="settings-card">
-                    <div class="section-title">👨‍🏫 بيانات المدرس والمادة الواحدة</div>
+                    <div class="section-title"><i class="fa-solid fa-user-tie"></i> بيانات المدرس والمادة الواحدة</div>
                     <div class="input-group">
                         <label>اسم المدرس:</label>
                         <input type="text" id="teacher-name-input" placeholder="مثال: الأستاذ شبر">
@@ -149,22 +164,12 @@
                 </div>
 
                 <div class="settings-card">
-                    <div class="section-title">🔔 تنبيه جرس الحصة</div>
-                    <button class="btn-bell" onclick="playSchoolBell()">🔊 تجربة جرس التنبيه (أوفلاين)</button>
+                    <div class="section-title"><i class="fa-solid fa-bell"></i> تنبيه جرس الحصة</div>
+                    <button class="btn-bell" onclick="playSchoolBell()"><i class="fa-solid fa-volume-high"></i> 🔊 تجربة جرس التنبيه (أوفلاين)</button>
                 </div>
 
                 <div class="settings-card">
-                    <div class="section-title">💾 النسخ الاحتياطي أوفلاين (حفظ واستعادة)</div>
-                    <p style="font-size: 11px; color: #64748b; margin-bottom: 8px;">احفظ نسخة احتياطية من جميع الدرجات والجدول كملف على هاتفك أو استعدها في أي وقت بدون إنترنت:</p>
-                    <div style="display: flex; gap: 6px;">
-                        <button onclick="exportFullBackup()" style="background: #0b3175; color: white; border: none; padding: 8px; border-radius: 8px; font-weight: 800; font-size: 11px; flex: 1; cursor: pointer;">📥 تنزيل نسخة احتياطية</button>
-                        <label for="restore-backup-input" style="background: #0284c7; color: white; padding: 8px; border-radius: 8px; font-weight: 800; font-size: 11px; flex: 1; cursor: pointer; text-align: center;">📤 استعادة نسخة</label>
-                        <input type="file" id="restore-backup-input" accept=".json" onchange="importFullBackup(event)" style="display: none;">
-                    </div>
-                </div>
-
-                <div class="settings-card">
-                    <div class="section-title">🏛️ إدارة القاعات (إضافة وحذف)</div>
+                    <div class="section-title"><i class="fa-solid fa-school"></i> إدارة القاعات (إضافة وحذف)</div>
                     <div class="input-group">
                         <label>إضافة قاعة جديدة:</label>
                         <div style="display: flex; gap: 6px;">
@@ -176,7 +181,7 @@
                 </div>
 
                 <div class="settings-card">
-                    <div class="section-title">📆 تخصيص اليوم والحصص الخمس</div>
+                    <div class="section-title"><i class="fa-solid fa-calendar-week"></i> تخصيص اليوم والحصص الخمس</div>
                     <div class="input-group">
                         <label style="font-size: 12px; color: #0b3175; font-weight: 900;">اختر اليوم للتحكم بحصصه:</label>
                         <select id="setting-day-select" onchange="loadDaySettings()"></select>
@@ -189,7 +194,7 @@
             <!-- View 3: Tasks -->
             <div id="view-tasks" class="view">
                 <div class="settings-card">
-                    <div class="section-title">📘 تحديد موضوع/مادة كل قاعة</div>
+                    <div class="section-title"><i class="fa-solid fa-chalkboard-user"></i> تحديد موضوع/مادة كل قاعة</div>
                     <div class="input-group">
                         <label>اختر القاعة:</label>
                         <select id="task-room-select" onchange="loadRoomTopic()"></select>
@@ -203,7 +208,7 @@
                 </div>
 
                 <div class="settings-card">
-                    <div class="section-title">✍️ إضافة موعد امتحان / مهمة جديدة</div>
+                    <div class="section-title"><i class="fa-solid fa-file-pen"></i> إضافة موعد امتحان / مهمة جديدة</div>
                     <div class="input-group">
                         <label>نوع المهمة / الامتحان:</label>
                         <select id="exam-type-input">
@@ -230,7 +235,7 @@
                 </div>
 
                 <div class="settings-card">
-                    <div class="section-title">🗓️ المهام المسجلة ليوم (<span class="selected-day-label"></span>)</div>
+                    <div class="section-title"><i class="fa-solid fa-calendar-check"></i> المهام المسجلة ليوم (<span class="selected-day-label"></span>)</div>
                     <div id="exams-list-container"></div>
                 </div>
             </div>
@@ -238,7 +243,7 @@
             <!-- View 4: Notifications -->
             <div id="view-notifications" class="view">
                 <div class="settings-card">
-                    <div class="section-title">🔔 مهام وتنبيهات يوم (<span class="selected-day-label"></span>)</div>
+                    <div class="section-title"><i class="fa-solid fa-bell"></i> مهام وتنبيهات يوم (<span class="selected-day-label"></span>)</div>
                     <p style="font-size: 11px; color: #64748b; margin-bottom: 12px;">تعرض التنبيهات الخاصة باليوم المختار فقط، انقر زر الصح عند إنجاز المهمة:</p>
                     <div id="notifications-rectangles-container"></div>
                 </div>
@@ -247,65 +252,27 @@
             <!-- View 5: سجل المدرس -->
             <div id="view-teacher-log" class="view">
                 <div class="settings-card">
-                    <div class="section-title">📒 سجل القاعات وأسماء الطلاب والدرجات</div>
+                    <div class="section-title"><i class="fa-solid fa-users-rectangle"></i> سجل القاعات وأسماء الطلاب والدرجات</div>
                     <p style="font-size: 11px; color: #64748b; margin-bottom: 10px;">انقر على أي قاعة أدناه لفتح سجل الطلاب والدرجات المتوافق مع شاشة الهاتف:</p>
                     <div id="teacher-rooms-list-view"></div>
                 </div>
             </div>
 
-            <!-- View 6: صانع الأسئلة (أوفلاين) -->
+            <!-- View 6: Exam Generator -->
             <div id="view-exam-generator" class="view">
-                <div class="settings-card">
-                    <div class="section-title">📝 صانع وطباعة الأسئلة (أوفلاين)</div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                        <div class="input-group">
-                            <label>عنوان الامتحان:</label>
-                            <input type="text" id="exam-paper-title" placeholder="امتحان الشهر الأول">
-                        </div>
-                        <div class="input-group">
-                            <label>الصف / الشعبة:</label>
-                            <input type="text" id="exam-paper-class" placeholder="الخامس العلمي">
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <label>نص السؤال:</label>
-                        <textarea id="exam-q-text" rows="2" placeholder="اكتب السؤال هنا..."></textarea>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                        <div class="input-group">
-                            <label>الدرجة:</label>
-                            <input type="text" id="exam-q-mark" placeholder="مثال: 10 درجات">
-                        </div>
-                        <div class="input-group">
-                            <label>ملاحظة / فرع:</label>
-                            <input type="text" id="exam-q-note" placeholder="مثال: أجب عن فرعين">
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 6px;">
-                        <button onclick="addOfflineQuestion()" class="btn-save" style="margin-top: 0; background: #0284c7; flex: 1;">+ إضافة السؤال</button>
-                        <button onclick="printOfflineExamPaper()" class="btn-save" style="margin-top: 0; background: #0f766e; flex: 1;">🖨️ طباعة الأسئلة PDF</button>
-                    </div>
-                </div>
-
-                <div class="settings-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <div class="section-title" style="margin-bottom: 0;">📋 الأسئلة المضافة</div>
-                        <button onclick="clearOfflineQuestions()" style="background: none; border: none; color: #ef4444; font-size: 11px; font-weight: 800; cursor: pointer;">مسح الكل</button>
-                    </div>
-                    <div id="offline-questions-list"></div>
-                </div>
+                <iframe src="https://exam-question-designer.hyderflow12.workers.dev/" style="width: 100%; height: 100%; border: none; background: white;" title="صانع الأسئلة"></iframe>
             </div>
 
         </main>
 
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">
-            <button class="nav-item active" id="btn-schedule" onclick="switchView('schedule')"><span class="nav-ico">🏠</span>الجدول</button>
-            <button class="nav-item" id="btn-tasks" onclick="switchView('tasks')"><span class="nav-ico">📋</span>المهام</button>
-            <button class="nav-item" id="btn-teacher-log" onclick="switchView('teacher-log')"><span class="nav-ico">📒</span>السجل</button>
-            <button class="nav-item" id="btn-notifications" onclick="switchView('notifications')"><span class="nav-ico">🔔</span>التنبيهات</button>
-            <button class="nav-item" id="btn-exam-generator" onclick="switchView('exam-generator')"><span class="nav-ico">📝</span>الأسئلة</button>
-            <button class="nav-item" id="btn-settings" onclick="switchView('settings')"><span class="nav-ico">⚙️</span>الإعدادات</button>
+            <button class="nav-item active" id="btn-schedule" onclick="switchView('schedule')"><i class="fa-solid fa-house"></i>الجدول</button>
+            <button class="nav-item" id="btn-tasks" onclick="switchView('tasks')"><i class="fa-solid fa-list-check"></i>المهام</button>
+            <button class="nav-item" id="btn-teacher-log" onclick="switchView('teacher-log')"><i class="fa-solid fa-book"></i>السجل</button>
+            <button class="nav-item" id="btn-notifications" onclick="switchView('notifications')"><i class="fa-solid fa-bell"></i>التنبيهات</button>
+            <button class="nav-item" id="btn-exam-generator" onclick="switchView('exam-generator')"><i class="fa-solid fa-file-pen"></i>الأسئلة</button>
+            <button class="nav-item" id="btn-settings" onclick="switchView('settings')"><i class="fa-solid fa-gear"></i>الإعدادات</button>
         </nav>
     </div>
 
@@ -314,14 +281,14 @@
         <div class="modal-content">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <h3 id="modal-room-title" style="color: #0b3175; font-size: 14px; font-weight: 900;"></h3>
-                <button onclick="closeRoomModal()" style="background: none; border: none; font-size: 18px; color: #64748b; cursor: pointer;">✕</button>
+                <button onclick="closeRoomModal()" style="background: none; border: none; font-size: 18px; color: #64748b; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
             <!-- أزرار الإجراءات السريعة (جبر السعي، تصدير وطباعة PDF عرضي) -->
             <div style="display: flex; gap: 4px; margin-bottom: 6px; flex-wrap: wrap;">
-                <button onclick="applyRoundingToSaei()" style="background: #7c3aed; color: white; border: none; padding: 6px 8px; border-radius: 6px; font-weight: 800; font-size: 10px; flex: 1; cursor: pointer;">✨ جبر السعي</button>
-                <button onclick="exportRoomCSV()" style="background: #0284c7; color: white; border: none; padding: 6px 8px; border-radius: 6px; font-weight: 800; font-size: 10px; flex: 1; cursor: pointer;">📊 تصدير Excel</button>
-                <button onclick="printRoomGrades()" style="background: #0f766e; color: white; border: none; padding: 6px 8px; border-radius: 6px; font-weight: 800; font-size: 10px; flex: 1; cursor: pointer;">🖨️ طباعة PDF عرضي</button>
+                <button onclick="applyRoundingToSaei()" style="background: #7c3aed; color: white; border: none; padding: 6px 8px; border-radius: 6px; font-weight: 800; font-size: 10px; flex: 1; cursor: pointer;"><i class="fa-solid fa-wand-magic-sparkles"></i> جبر السعي</button>
+                <button onclick="exportRoomCSV()" style="background: #0284c7; color: white; border: none; padding: 6px 8px; border-radius: 6px; font-weight: 800; font-size: 10px; flex: 1; cursor: pointer;"><i class="fa-solid fa-file-arrow-down"></i> تصدير Excel</button>
+                <button onclick="printRoomGrades()" style="background: #0f766e; color: white; border: none; padding: 6px 8px; border-radius: 6px; font-weight: 800; font-size: 10px; flex: 1; cursor: pointer;"><i class="fa-solid fa-file-pdf"></i> طباعة PDF عرضي</button>
             </div>
 
             <div style="font-size: 10px; color: #475569; background: #f8fafc; padding: 5px 8px; border-radius: 6px; margin-bottom: 6px; border: 1px solid #e2e8f0;">
@@ -330,10 +297,10 @@
 
             <!-- تحميل ملف من الهاتف أو لصق الأسماء -->
             <div class="input-group" style="background: #f0f5ff; padding: 8px; border-radius: 8px; border: 1px dashed #3b82f6; margin-bottom: 6px;">
-                <label style="color: #1e3a8a; font-size: 10px; margin-bottom: 4px;">📱 استيراد أسماء الطلاب أو لصقها وحفظها (أوفلاين):</label>
+                <label style="color: #1e3a8a; font-size: 10px; margin-bottom: 4px;"><i class="fa-solid fa-mobile-screen-button"></i> استيراد أسماء الطلاب أو لصقها وحفظها:</label>
                 
                 <label for="excel-file-input" class="custom-file-upload">
-                    📁 تحميل ملف الأسماء من الهاتف (.csv / .txt)
+                    <i class="fa-solid fa-file-excel"></i> 📁 تحميل ملف الأسماء من الهاتف (.csv / .txt)
                 </label>
                 <input type="file" id="excel-file-input" accept=".csv, .txt, text/plain" onchange="handleExcelImport(event)" style="display: none;">
 
@@ -383,44 +350,6 @@
     </div>
 
     <script>
-        // تسجيل Service Worker مدمج للعمل أوفلاين عند التصفح عبر HTTP/HTTPS
-        (function registerOfflineSW() {
-            if (!('serviceWorker' in navigator)) return;
-            if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-            const swCode = `
-                const CACHE_NAME = 'teacher-log-offline-v1';
-                self.addEventListener('install', (e) => {
-                    self.skipWaiting();
-                    e.waitUntil(
-                        caches.open(CACHE_NAME).then((cache) => cache.addAll([self.registration.scope]).catch(() => {}))
-                    );
-                });
-                self.addEventListener('activate', (e) => {
-                    e.waitUntil(self.clients.claim());
-                });
-                self.addEventListener('fetch', (e) => {
-                    if (e.request.method !== 'GET') return;
-                    e.respondWith(
-                        caches.match(e.request).then((cached) => {
-                            const netFetch = fetch(e.request).then((res) => {
-                                if (res && res.status === 200) {
-                                    const copy = res.clone();
-                                    caches.open(CACHE_NAME).then((cache) => cache.put(e.request, copy));
-                                }
-                                return res;
-                            }).catch(() => cached);
-                            return cached || netFetch;
-                        })
-                    );
-                });
-            `;
-            try {
-                const blob = new Blob([swCode], { type: 'application/javascript' });
-                const swUrl = URL.createObjectURL(blob);
-                navigator.serviceWorker.register(swUrl).catch(() => {});
-            } catch (e) {}
-        })();
-
         const daysList = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
         let currentDay = 'الأحد';
 
@@ -433,7 +362,6 @@
         let roomTopics = JSON.parse(localStorage.getItem('app_room_topics')) || {};
         let examsSchedule = JSON.parse(localStorage.getItem('app_exams_schedule')) || [];
         let roomStudentsDetailed = JSON.parse(localStorage.getItem('app_room_students_detailed_v2')) || {};
-        let offlineQuestions = JSON.parse(localStorage.getItem('app_offline_questions')) || [];
 
         let currentActiveRoomForModal = '';
 
@@ -447,48 +375,41 @@
 
         let scheduleData = JSON.parse(localStorage.getItem('app_schedule')) || {
             'الأحد': [
-                { period: 'الحصة الأولى', room: 'قاعة 1', type: 'lesson', color: 'yellow', icon: '🧪' },
-                { period: 'الحصة الثانية', room: 'قاعة 12', type: 'free', color: 'purple', icon: '☕' },
-                { period: 'الحصة الثالثة', room: 'قاعة 14', type: 'lesson', color: 'green', icon: '🧫' },
-                { period: 'الحصة الرابعة', room: 'قاعة 1', type: 'lesson', color: 'blue', icon: '⚛️' },
-                { period: 'الحصة الخامسة', room: 'قاعة 12', type: 'free', color: 'orange', icon: '☕' }
+                { period: 'الحصة الأولى', room: 'قاعة 1', type: 'lesson', color: 'yellow', icon: 'fa-flask' },
+                { period: 'الحصة الثانية', room: 'قاعة 12', type: 'free', color: 'purple', icon: 'fa-mug-hot' },
+                { period: 'الحصة الثالثة', room: 'قاعة 14', type: 'lesson', color: 'green', icon: 'fa-vial' },
+                { period: 'الحصة الرابعة', room: 'قاعة 1', type: 'lesson', color: 'blue', icon: 'fa-atom' },
+                { period: 'الحصة الخامسة', room: 'قاعة 12', type: 'free', color: 'orange', icon: 'fa-mug-hot' }
             ],
             'الإثنين': [
-                { period: 'الحصة الأولى', room: 'قاعة 1', type: 'lesson', color: 'blue', icon: '🧪' },
-                { period: 'الحصة الثانية', room: 'قاعة 12', type: 'lesson', color: 'yellow', icon: '⚛️' },
-                { period: 'الحصة الثالثة', room: 'قاعة 14', type: 'free', color: 'purple', icon: '☕' },
-                { period: 'الحصة الرابعة', room: 'قاعة 1', type: 'lesson', color: 'green', icon: '🧫' },
-                { period: 'الحصة الخامسة', room: 'قاعة 12', type: 'lesson', color: 'orange', icon: '📘' }
+                { period: 'الحصة الأولى', room: 'قاعة 1', type: 'lesson', color: 'blue', icon: 'fa-flask' },
+                { period: 'الحصة الثانية', room: 'قاعة 12', type: 'lesson', color: 'yellow', icon: 'fa-atom' },
+                { period: 'الحصة الثالثة', room: 'قاعة 14', type: 'free', color: 'purple', icon: 'fa-mug-hot' },
+                { period: 'الحصة الرابعة', room: 'قاعة 1', type: 'lesson', color: 'green', icon: 'fa-vial' },
+                { period: 'الحصة الخامسة', room: 'قاعة 12', type: 'lesson', color: 'orange', icon: 'fa-book' }
             ],
             'الثلاثاء': [
-                { period: 'الحصة الأولى', room: 'قاعة 14', type: 'free', color: 'purple', icon: '☕' },
-                { period: 'الحصة الثانية', room: 'قاعة 1', type: 'lesson', color: 'yellow', icon: '🧪' },
-                { period: 'الحصة الثالثة', room: 'قاعة 12', type: 'lesson', color: 'blue', icon: '⚛️' },
-                { period: 'الحصة الرابعة', room: 'قاعة 14', type: 'lesson', color: 'green', icon: '🧫' },
-                { period: 'الحصة الخامسة', room: 'قاعة 1', type: 'free', color: 'orange', icon: '☕' }
+                { period: 'الحصة الأولى', room: 'قاعة 14', type: 'free', color: 'purple', icon: 'fa-mug-hot' },
+                { period: 'الحصة الثانية', room: 'قاعة 1', type: 'lesson', color: 'yellow', icon: 'fa-flask' },
+                { period: 'الحصة الثالثة', room: 'قاعة 12', type: 'lesson', color: 'blue', icon: 'fa-atom' },
+                { period: 'الحصة الرابعة', room: 'قاعة 14', type: 'lesson', color: 'green', icon: 'fa-vial' },
+                { period: 'الحصة الخامسة', room: 'قاعة 1', type: 'free', color: 'orange', icon: 'fa-mug-hot' }
             ],
             'الأربعاء': [
-                { period: 'الحصة الأولى', room: 'قاعة 1', type: 'lesson', color: 'green', icon: '🧪' },
-                { period: 'الحصة الثانية', room: 'قاعة 12', type: 'free', color: 'purple', icon: '☕' },
-                { period: 'الحصة الثالثة', room: 'قاعة 14', type: 'lesson', color: 'yellow', icon: '⚛️' },
-                { period: 'الحصة الرابعة', room: 'قاعة 1', type: 'lesson', color: 'blue', icon: '🧫' },
-                { period: 'الحصة الخامسة', room: 'قاعة 12', type: 'lesson', color: 'orange', icon: '📘' }
+                { period: 'الحصة الأولى', room: 'قاعة 1', type: 'lesson', color: 'green', icon: 'fa-flask' },
+                { period: 'الحصة الثانية', room: 'قاعة 12', type: 'free', color: 'purple', icon: 'fa-mug-hot' },
+                { period: 'الحصة الثالثة', room: 'قاعة 14', type: 'lesson', color: 'yellow', icon: 'fa-atom' },
+                { period: 'الحصة الرابعة', room: 'قاعة 1', type: 'lesson', color: 'blue', icon: 'fa-vial' },
+                { period: 'الحصة الخامسة', room: 'قاعة 12', type: 'lesson', color: 'orange', icon: 'fa-book' }
             ],
             'الخميس': [
-                { period: 'الحصة الأولى', room: 'قاعة 12', type: 'lesson', color: 'orange', icon: '🧪' },
-                { period: 'الحصة الثانية', room: 'قاعة 1', type: 'lesson', color: 'blue', icon: '⚛️' },
-                { period: 'الحصة الثالثة', room: 'قاعة 14', type: 'free', color: 'purple', icon: '☕' },
-                { period: 'الحصة الرابعة', room: 'قاعة 12', type: 'lesson', color: 'yellow', icon: '🧫' },
-                { period: 'الحصة الخامسة', room: 'قاعة 1', type: 'lesson', color: 'green', icon: '📘' }
+                { period: 'الحصة الأولى', room: 'قاعة 12', type: 'lesson', color: 'orange', icon: 'fa-flask' },
+                { period: 'الحصة الثانية', room: 'قاعة 1', type: 'lesson', color: 'blue', icon: 'fa-atom' },
+                { period: 'الحصة الثالثة', room: 'قاعة 14', type: 'free', color: 'purple', icon: 'fa-mug-hot' },
+                { period: 'الحصة الرابعة', room: 'قاعة 12', type: 'lesson', color: 'yellow', icon: 'fa-vial' },
+                { period: 'الحصة الخامسة', room: 'قاعة 1', type: 'lesson', color: 'green', icon: 'fa-book' }
             ]
         };
-
-        function resolveLessonEmoji(iconVal, type) {
-            if (!iconVal || iconVal.startsWith('fa-')) {
-                return type === 'free' ? '☕' : '🧪';
-            }
-            return iconVal;
-        }
 
         function createEmptyStudent(name = '') {
             return {
@@ -549,7 +470,6 @@
             renderTeacherRoomsList();
             updateSelectedDayLabels();
             renderNotificationsView();
-            renderOfflineQuestions();
             document.getElementById('teacher-name-input').value = teacherProfile.name;
             document.getElementById('teacher-subject-input').value = teacherProfile.subject;
         };
@@ -581,6 +501,17 @@
             document.getElementById(`view-${viewName}`).classList.add('active');
             document.getElementById(`btn-${viewName}`).classList.add('active');
 
+            const header = document.getElementById('main-header');
+            const daysBar = document.getElementById('days-bar');
+
+            if (viewName === 'exam-generator') {
+                if (header) header.style.display = 'none';
+                if (daysBar) daysBar.style.display = 'none';
+            } else {
+                if (header) header.style.display = 'flex';
+                if (daysBar) daysBar.style.display = 'flex';
+            }
+
             if(viewName === 'settings') {
                 initSettingsDropdown();
                 loadDaySettings();
@@ -591,8 +522,6 @@
                 renderTeacherRoomsList();
             } else if(viewName === 'notifications') {
                 renderNotificationsView();
-            } else if(viewName === 'exam-generator') {
-                renderOfflineQuestions();
             }
         }
 
@@ -623,13 +552,12 @@
             lessons.forEach((item, idx) => {
                 const displayTitle = item.type === 'lesson' ? `درس ${teacherProfile.subject}` : 'تفرغ';
                 const roomTopicText = roomTopics[item.room] ? ` (${roomTopics[item.room]})` : '';
-                const emoji = resolveLessonEmoji(item.icon, item.type);
 
                 const card = document.createElement('div');
                 card.className = `lesson-card card-${item.color}`;
                 card.innerHTML = `
                     <div class="card-left">
-                        <div class="icon-box icon-${item.color}">${emoji}</div>
+                        <div class="icon-box icon-${item.color}"><i class="fa-solid ${item.icon}"></i></div>
                         <div class="card-info">
                             <div class="title">${item.period}</div>
                             <div class="subtitle">${displayTitle}</div>
@@ -657,7 +585,7 @@
                 div.style.cssText = "background: #e0f2fe; color: #0369a1; padding: 6px 10px; border-radius: 10px; font-size: 12px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;";
                 div.innerHTML = `
                     <span>🏛️ ${room}</span>
-                    <button onclick="deleteRoom('${room}')" style="background: none; border: none; color: #ef4444; font-size: 13px; cursor: pointer;">🗑️</button>
+                    <button onclick="deleteRoom('${room}')" style="background: none; border: none; color: #ef4444; font-size: 13px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
                 `;
                 chips.appendChild(div);
             });
@@ -783,10 +711,10 @@
                     l.room = rSelect.value;
                     if(l.type === 'free') {
                         l.color = 'purple';
-                        l.icon = '☕';
+                        l.icon = 'fa-mug-hot';
                     } else {
                         l.color = 'yellow';
-                        l.icon = '🧪';
+                        l.icon = 'fa-flask';
                     }
                 }
             });
@@ -900,7 +828,7 @@
                             📅 يوم ${exam.day} • 🏛️ ${exam.room}
                         </div>
                     </div>
-                    <button onclick="deleteExam(${exam.id})" style="background: none; border: none; color: #ef4444; font-size: 14px; cursor: pointer;">🗑️</button>
+                    <button onclick="deleteExam(${exam.id})" style="background: none; border: none; color: #ef4444; font-size: 14px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
                 `;
                 container.appendChild(div);
             });
@@ -934,7 +862,7 @@
                         </div>
                     </div>
                     <button class="btn-check-task ${task.completed ? 'done' : ''}" onclick="toggleTaskCompletion(${task.id})" title="${task.completed ? 'تراجع عن الإنجاز' : 'تحديد كـ أُنجزت'}">
-                        ✓
+                        <i class="fa-solid ${task.completed ? 'fa-check' : 'fa-check'}"></i>
                     </button>
                 `;
                 container.appendChild(card);
@@ -960,7 +888,7 @@
 
                 card.innerHTML = `
                     <span>🏛️ ${room}</span>
-                    <span style="font-size: 11px; font-weight: 700; opacity: 0.8;">${countInfo} ◀</span>
+                    <span style="font-size: 11px; font-weight: 700; opacity: 0.8;">${countInfo} <i class="fa-solid fa-chevron-left"></i></span>
                 `;
                 container.appendChild(card);
             });
@@ -1133,7 +1061,7 @@
                     cellsHtml += `<td><input type="text" id="st-${idx}-${f}" class="${extraClass}" oninput="recalcRowGrades(${idx}, '${f}')"></td>`;
                 });
 
-                cellsHtml += `<td><button onclick="removeStudentRow(${idx})" style="background:none; border:none; color:#ef4444; cursor:pointer;">🗑️</button></td>`;
+                cellsHtml += `<td><button onclick="removeStudentRow(${idx})" style="background:none; border:none; color:#ef4444; cursor:pointer;"><i class="fa-solid fa-trash"></i></button></td>`;
                 tr.innerHTML = cellsHtml;
                 tbody.appendChild(tr);
 
@@ -1249,79 +1177,6 @@
             URL.revokeObjectURL(url);
         }
 
-        function exportFullBackup() {
-            const backup = {
-                teacherProfile,
-                availableRooms,
-                roomTopics,
-                examsSchedule,
-                roomStudentsDetailed,
-                scheduleData,
-                offlineQuestions,
-                exportedAt: new Date().toISOString()
-            };
-            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `نسخة_احتياطية_سجل_المدرس.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        function importFullBackup(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (data.teacherProfile) {
-                        teacherProfile = data.teacherProfile;
-                        localStorage.setItem('teacher_name', teacherProfile.name);
-                        localStorage.setItem('teacher_subject', teacherProfile.subject);
-                    }
-                    if (Array.isArray(data.availableRooms)) {
-                        availableRooms = data.availableRooms;
-                        localStorage.setItem('app_rooms', JSON.stringify(availableRooms));
-                    }
-                    if (data.roomTopics) {
-                        roomTopics = data.roomTopics;
-                        localStorage.setItem('app_room_topics', JSON.stringify(roomTopics));
-                    }
-                    if (Array.isArray(data.examsSchedule)) {
-                        examsSchedule = data.examsSchedule;
-                        localStorage.setItem('app_exams_schedule', JSON.stringify(examsSchedule));
-                    }
-                    if (data.roomStudentsDetailed) {
-                        roomStudentsDetailed = data.roomStudentsDetailed;
-                        localStorage.setItem('app_room_students_detailed_v2', JSON.stringify(roomStudentsDetailed));
-                    }
-                    if (data.scheduleData) {
-                        scheduleData = data.scheduleData;
-                        localStorage.setItem('app_schedule', JSON.stringify(scheduleData));
-                    }
-                    if (Array.isArray(data.offlineQuestions)) {
-                        offlineQuestions = data.offlineQuestions;
-                        localStorage.setItem('app_offline_questions', JSON.stringify(offlineQuestions));
-                    }
-                    updateHeaderProfile();
-                    renderSchedule();
-                    renderRoomsChips();
-                    initTasksView();
-                    renderTeacherRoomsList();
-                    renderNotificationsView();
-                    renderOfflineQuestions();
-                    alert('تمت استعادة النسخة الاحتياطية بنجاح!');
-                } catch (err) {
-                    alert('ملف النسخة الاحتياطية غير صالح.');
-                }
-            };
-            reader.readAsText(file, 'UTF-8');
-        }
-
         function escapeHtml(text) {
             return String(text || '')
                 .replace(/&/g, '&amp;')
@@ -1399,7 +1254,7 @@
                     <title>سجل السعي - ${escapeHtml(currentActiveRoomForModal)}</title>
                     <style>
                         @page { size: A4 landscape; margin: 10mm; }
-                        * { box-sizing: border-box; font-family: 'Cairo', 'Tajawal', Tahoma, sans-serif; }
+                        * { box-sizing: border-box; font-family: 'Cairo', Tahoma, sans-serif; }
                         body { direction: rtl; color: #0f172a; margin: 0; padding: 8px; }
                         .top-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0b3175; padding-bottom: 8px; margin-bottom: 10px; }
                         .teacher-meta { font-size: 14px; font-weight: 900; color: #0b3175; }
@@ -1471,97 +1326,6 @@
                 </html>
             `);
             printWindow.document.close();
-        }
-
-        function addOfflineQuestion() {
-            const text = document.getElementById('exam-q-text').value.trim();
-            const mark = document.getElementById('exam-q-mark').value.trim();
-            const note = document.getElementById('exam-q-note').value.trim();
-            if (!text) {
-                alert('يرجى كتابة نص السؤال أولاً.');
-                return;
-            }
-            offlineQuestions.push({ id: Date.now(), text, mark, note });
-            localStorage.setItem('app_offline_questions', JSON.stringify(offlineQuestions));
-            document.getElementById('exam-q-text').value = '';
-            document.getElementById('exam-q-mark').value = '';
-            document.getElementById('exam-q-note').value = '';
-            renderOfflineQuestions();
-        }
-
-        function removeOfflineQuestion(id) {
-            offlineQuestions = offlineQuestions.filter(q => q.id !== id);
-            localStorage.setItem('app_offline_questions', JSON.stringify(offlineQuestions));
-            renderOfflineQuestions();
-        }
-
-        function clearOfflineQuestions() {
-            if (offlineQuestions.length === 0) return;
-            offlineQuestions = [];
-            localStorage.setItem('app_offline_questions', JSON.stringify(offlineQuestions));
-            renderOfflineQuestions();
-        }
-
-        function renderOfflineQuestions() {
-            const container = document.getElementById('offline-questions-list');
-            if (!container) return;
-            if (offlineQuestions.length === 0) {
-                container.innerHTML = '<p style="font-size: 11px; color: #94a3b8; text-align: center;">لا توجد أسئلة مضافة بعد.</p>';
-                return;
-            }
-            container.innerHTML = offlineQuestions.map((q, idx) => `
-                <div class="q-item-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                        <strong style="color: #0b3175;">س${idx + 1} ${q.mark ? `(${escapeHtml(q.mark)})` : ''}</strong>
-                        <button onclick="removeOfflineQuestion(${q.id})" style="background: none; border: none; color: #ef4444; cursor: pointer;">🗑️</button>
-                    </div>
-                    <div style="white-space: pre-wrap; color: #1e293b; font-weight: 700;">${escapeHtml(q.text)}</div>
-                    ${q.note ? `<div style="font-size: 11px; color: #64748b; margin-top: 4px;">📌 ${escapeHtml(q.note)}</div>` : ''}
-                </div>
-            `).join('');
-        }
-
-        function printOfflineExamPaper() {
-            if (offlineQuestions.length === 0) {
-                alert('أضف سؤالاً واحداً على الأقل للطباعة.');
-                return;
-            }
-            const title = document.getElementById('exam-paper-title').value.trim() || 'ورقة أسئلة';
-            const cls = document.getElementById('exam-paper-class').value.trim() || '';
-            const qHtml = offlineQuestions.map((q, idx) => `
-                <div style="margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px dashed #cbd5e1;">
-                    <div style="font-weight: 900; font-size: 14px; margin-bottom: 4px;">
-                        س${idx + 1}: ${q.note ? `<span style="font-size: 12px; color: #475569;">(${escapeHtml(q.note)})</span>` : ''}
-                        ${q.mark ? `<span style="float: left; font-size: 12px;">[${escapeHtml(q.mark)}]</span>` : ''}
-                    </div>
-                    <div style="white-space: pre-wrap; font-size: 13px; line-height: 1.7;">${escapeHtml(q.text)}</div>
-                </div>
-            `).join('');
-
-            const w = window.open('', '', 'height=700,width=800');
-            if (!w) return;
-            w.document.write(`
-                <html lang="ar" dir="rtl">
-                <head>
-                    <title>${escapeHtml(title)}</title>
-                    <style>
-                        @page { size: A4 portrait; margin: 14mm; }
-                        body { font-family: 'Cairo', 'Tajawal', Tahoma, sans-serif; direction: rtl; color: #0f172a; }
-                        .header { border: 2px solid #0b3175; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; display: flex; justify-content: space-between; font-weight: 800; font-size: 13px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <div>المدرس: ${escapeHtml(teacherProfile.name)}<br>المادة: ${escapeHtml(teacherProfile.subject)}</div>
-                        <div style="text-align: center;">${escapeHtml(title)}<br>${escapeHtml(cls)}</div>
-                        <div>اسم الطالب: .......................<br>الشعبة: .......................</div>
-                    </div>
-                    ${qHtml}
-                    <script>window.onload = function() { setTimeout(function() { window.print(); window.close(); }, 200); };<\/script>
-                </body>
-                </html>
-            `);
-            w.document.close();
         }
 
         function playSchoolBell() {

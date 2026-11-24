@@ -115,6 +115,7 @@
         .grades-table th.th-mid { background-color: #7c3aed; }
         .grades-table th.th-f2 { background-color: #0f766e; }
         .grades-table input { width: 38px; padding: 2px; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 10px; font-family: 'Cairo'; }
+        .grades-table input.month-calc { background-color: #f8fafc; font-weight: 800; color: #1e293b; border-color: #94a3b8; }
         .grades-table input.saei-calc { background-color: #f0f9ff; font-weight: 900; color: #0369a1; border-color: #7dd3fc; }
         .grades-table td:first-child input { width: 120px; text-align: right; font-weight: 800; }
     </style>
@@ -291,7 +292,7 @@
             </div>
 
             <div style="font-size: 10px; color: #475569; background: #f8fafc; padding: 5px 8px; border-radius: 6px; margin-bottom: 6px; border: 1px solid #e2e8f0;">
-                <strong>السعي:</strong> (الشهر الأول + الشهر الثاني) ÷ 2 • الطباعة تعرض السجل أفقياً (Landscape) مع أسماء الطلاب والدرجات وإحصائيات السعي أسفل الشعبة.
+                <strong>الشهر:</strong> (الشفوي + التحريري) ÷ 2 • <strong>السعي:</strong> (الشهر الأول + الشهر الثاني) ÷ 2.
             </div>
 
             <!-- تحميل ملف من الهاتف أو لصق الأسماء -->
@@ -910,6 +911,28 @@
             return Number.isInteger(val) ? String(val) : String(Number(val.toFixed(2)));
         }
 
+        function parseGradeVal(raw) {
+            const cleaned = String(raw ?? '').trim().replace(/[٠-٩]/g, d => '0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
+            if (cleaned === '') return null;
+            const num = parseFloat(cleaned);
+            return Number.isNaN(num) ? null : num;
+        }
+
+        function updateSaeiFromMonths(m1El, m2El, saeiEl) {
+            const n1 = parseGradeVal(m1El.value);
+            const n2 = parseGradeVal(m2El.value);
+
+            if (n1 !== null && n2 !== null) {
+                saeiEl.value = formatNum((n1 + n2) / 2);
+            } else if (n1 !== null) {
+                saeiEl.value = formatNum(n1);
+            } else if (n2 !== null) {
+                saeiEl.value = formatNum(n2);
+            } else {
+                saeiEl.value = '';
+            }
+        }
+
         function recalcRowGrades(idx, sourceField) {
             const prefixList = ['f1', 'f2'];
             prefixList.forEach(p => {
@@ -925,35 +948,36 @@
 
                 if (!o1El || !w1El || !m1El || !o2El || !w2El || !m2El || !saeiEl) return;
 
+                let monthChanged = false;
+
                 if (sourceField === `${p}_o1` || sourceField === `${p}_w1`) {
-                    const r1 = o1El.value.trim();
-                    const r2 = w1El.value.trim();
-                    if (r1 !== '' || r2 !== '') {
-                        m1El.value = formatNum((parseFloat(r1) || 0) + (parseFloat(r2) || 0));
+                    const r1 = parseGradeVal(o1El.value);
+                    const r2 = parseGradeVal(w1El.value);
+                    if (r1 !== null || r2 !== null) {
+                        m1El.value = formatNum(((r1 ?? 0) + (r2 ?? 0)) / 2);
                     } else {
                         m1El.value = '';
                     }
+                    monthChanged = true;
                 }
 
                 if (sourceField === `${p}_o2` || sourceField === `${p}_w2`) {
-                    const r1 = o2El.value.trim();
-                    const r2 = w2El.value.trim();
-                    if (r1 !== '' || r2 !== '') {
-                        m2El.value = formatNum((parseFloat(r1) || 0) + (parseFloat(r2) || 0));
+                    const r1 = parseGradeVal(o2El.value);
+                    const r2 = parseGradeVal(w2El.value);
+                    if (r1 !== null || r2 !== null) {
+                        m2El.value = formatNum(((r1 ?? 0) + (r2 ?? 0)) / 2);
                     } else {
                         m2El.value = '';
                     }
+                    monthChanged = true;
                 }
 
-                if (sourceField !== `${p}_saei`) {
-                    const rawM1 = m1El.value.trim();
-                    const rawM2 = m2El.value.trim();
-                    if (rawM1 !== '' || rawM2 !== '') {
-                        const avg = ((parseFloat(rawM1) || 0) + (parseFloat(rawM2) || 0)) / 2;
-                        saeiEl.value = formatNum(avg);
-                    } else {
-                        saeiEl.value = '';
-                    }
+                if (sourceField === `${p}_m1` || sourceField === `${p}_m2`) {
+                    monthChanged = true;
+                }
+
+                if (monthChanged && sourceField !== `${p}_saei`) {
+                    updateSaeiFromMonths(m1El, m2El, saeiEl);
                 }
             });
         }
@@ -966,13 +990,10 @@
                 ['f1', 'f2'].forEach(p => {
                     const saeiEl = document.getElementById(`st-${idx}-${p}_saei`);
                     if (!saeiEl) return;
-                    const raw = saeiEl.value.trim();
-                    if (raw !== '') {
-                        const num = parseFloat(raw);
-                        if (!Number.isNaN(num) && num % 1 !== 0) {
-                            saeiEl.value = String(Math.ceil(num));
-                            roundedCount++;
-                        }
+                    const num = parseGradeVal(saeiEl.value);
+                    if (num !== null && num % 1 !== 0) {
+                        saeiEl.value = String(Math.ceil(num));
+                        roundedCount++;
                     }
                 });
             });
@@ -1035,7 +1056,9 @@
 
                 fields.forEach(f => {
                     const isSaei = f === 'f1_saei' || f === 'f2_saei';
-                    cellsHtml += `<td><input type="text" id="st-${idx}-${f}" class="${isSaei ? 'saei-calc' : ''}" oninput="recalcRowGrades(${idx}, '${f}')"></td>`;
+                    const isMonth = f === 'f1_m1' || f === 'f1_m2' || f === 'f2_m1' || f === 'f2_m2';
+                    const extraClass = isSaei ? 'saei-calc' : (isMonth ? 'month-calc' : '');
+                    cellsHtml += `<td><input type="text" id="st-${idx}-${f}" class="${extraClass}" oninput="recalcRowGrades(${idx}, '${f}')"></td>`;
                 });
 
                 cellsHtml += `<td><button onclick="removeStudentRow(${idx})" style="background:none; border:none; color:#ef4444; cursor:pointer;"><i class="fa-solid fa-trash"></i></button></td>`;
@@ -1169,12 +1192,10 @@
 
             students.forEach(st => {
                 const scores = [];
-                if (st.f1_saei !== '' && !Number.isNaN(parseFloat(st.f1_saei))) {
-                    scores.push(parseFloat(st.f1_saei));
-                }
-                if (st.f2_saei !== '' && !Number.isNaN(parseFloat(st.f2_saei))) {
-                    scores.push(parseFloat(st.f2_saei));
-                }
+                const s1 = parseGradeVal(st.f1_saei);
+                const s2 = parseGradeVal(st.f2_saei);
+                if (s1 !== null) scores.push(s1);
+                if (s2 !== null) scores.push(s2);
 
                 if (scores.length > 0) {
                     evaluatedCount++;

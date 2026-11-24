@@ -283,15 +283,15 @@
                 <button onclick="closeRoomModal()" style="background: none; border: none; font-size: 18px; color: #64748b; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
-            <!-- أزرار الإجراءات السريعة (جبر السعي، تصدير وطباعة) -->
+            <!-- أزرار الإجراءات السريعة (جبر السعي، تصدير وطباعة PDF عرضي) -->
             <div style="display: flex; gap: 4px; margin-bottom: 6px; flex-wrap: wrap;">
                 <button onclick="applyRoundingToSaei()" style="background: #7c3aed; color: white; border: none; padding: 6px 8px; border-radius: 6px; font-weight: 800; font-size: 10px; flex: 1; cursor: pointer;"><i class="fa-solid fa-wand-magic-sparkles"></i> جبر السعي</button>
                 <button onclick="exportRoomCSV()" style="background: #0284c7; color: white; border: none; padding: 6px 8px; border-radius: 6px; font-weight: 800; font-size: 10px; flex: 1; cursor: pointer;"><i class="fa-solid fa-file-arrow-down"></i> تصدير Excel</button>
-                <button onclick="printRoomGrades()" style="background: #475569; color: white; border: none; padding: 6px 8px; border-radius: 6px; font-weight: 800; font-size: 10px; flex: 1; cursor: pointer;"><i class="fa-solid fa-print"></i> طباعة</button>
+                <button onclick="printRoomGrades()" style="background: #0f766e; color: white; border: none; padding: 6px 8px; border-radius: 6px; font-weight: 800; font-size: 10px; flex: 1; cursor: pointer;"><i class="fa-solid fa-file-pdf"></i> طباعة PDF عرضي</button>
             </div>
 
             <div style="font-size: 10px; color: #475569; background: #f8fafc; padding: 5px 8px; border-radius: 6px; margin-bottom: 6px; border: 1px solid #e2e8f0;">
-                <strong>السعي:</strong> (الشهر الأول + الشهر الثاني) ÷ 2 • يمكنك أيضاً نسخ قائمة أسماء ولصقها مباشرة في حقل اسم الطالب أو في الصندوق أدناه ويتم حفظها تلقائياً.
+                <strong>السعي:</strong> (الشهر الأول + الشهر الثاني) ÷ 2 • الطباعة تعرض السجل أفقياً (Landscape) مع أسماء الطلاب والدرجات وإحصائيات السعي أسفل الشعبة.
             </div>
 
             <!-- تحميل ملف من الهاتف أو لصق الأسماء -->
@@ -431,7 +431,6 @@
             } else if (line.includes(',')) {
                 line = line.split(',')[0].replace(/"/g, '').trim();
             }
-            // إزالة الترقيم التلقائي البسيط في بداية السطر مثل "1- " أو "1. "
             line = line.replace(/^[\d٠-٩]+[\-\.\)\s]+/, '').trim();
             return line;
         }
@@ -1155,32 +1154,152 @@
             URL.revokeObjectURL(url);
         }
 
+        function escapeHtml(text) {
+            return String(text || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function computeSaeiStats(students, passMark = 50) {
+            let evaluatedCount = 0;
+            let passedCount = 0;
+            let failedCount = 0;
+
+            students.forEach(st => {
+                const scores = [];
+                if (st.f1_saei !== '' && !Number.isNaN(parseFloat(st.f1_saei))) {
+                    scores.push(parseFloat(st.f1_saei));
+                }
+                if (st.f2_saei !== '' && !Number.isNaN(parseFloat(st.f2_saei))) {
+                    scores.push(parseFloat(st.f2_saei));
+                }
+
+                if (scores.length > 0) {
+                    evaluatedCount++;
+                    const avgSaei = scores.reduce((a, b) => a + b, 0) / scores.length;
+                    if (avgSaei >= passMark) {
+                        passedCount++;
+                    } else {
+                        failedCount++;
+                    }
+                }
+            });
+
+            const passRate = evaluatedCount > 0 ? ((passedCount / evaluatedCount) * 100).toFixed(1).replace(/\.0$/, '') : '0';
+            return { evaluatedCount, passedCount, failedCount, passRate };
+        }
+
         function printRoomGrades() {
             persistModalGrades();
-            const tableHTML = document.getElementById('printable-table').outerHTML;
-            const roomTitle = document.getElementById('modal-room-title').innerText;
-            const teacherSub = document.getElementById('teacher-header-subtitle').innerText;
+            const students = roomStudentsDetailed[currentActiveRoomForModal] || [];
+            if(students.length === 0) {
+                alert('لا توجد بيانات طلاب لطباعتها في هذه القاعة!');
+                return;
+            }
 
-            const printWindow = window.open('', '', 'height=600,width=900');
+            const passMark = 50;
+            const stats = computeSaeiStats(students, passMark);
+
+            const rowsHtml = students.map((st, idx) => `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td class="st-name-cell">${escapeHtml(st.name)}</td>
+                    <td>${escapeHtml(st.f1_o1)}</td>
+                    <td>${escapeHtml(st.f1_w1)}</td>
+                    <td>${escapeHtml(st.f1_m1)}</td>
+                    <td>${escapeHtml(st.f1_o2)}</td>
+                    <td>${escapeHtml(st.f1_w2)}</td>
+                    <td>${escapeHtml(st.f1_m2)}</td>
+                    <td class="saei-col">${escapeHtml(st.f1_saei)}</td>
+                    <td>${escapeHtml(st.mid)}</td>
+                    <td>${escapeHtml(st.f2_o1)}</td>
+                    <td>${escapeHtml(st.f2_w1)}</td>
+                    <td>${escapeHtml(st.f2_m1)}</td>
+                    <td>${escapeHtml(st.f2_o2)}</td>
+                    <td>${escapeHtml(st.f2_w2)}</td>
+                    <td>${escapeHtml(st.f2_m2)}</td>
+                    <td class="saei-col">${escapeHtml(st.f2_saei)}</td>
+                </tr>
+            `).join('');
+
+            const printWindow = window.open('', '', 'height=650,width=1100');
             if(!printWindow) return;
+
             printWindow.document.write(`
                 <html lang="ar" dir="rtl">
                 <head>
-                    <title>${roomTitle}</title>
+                    <title>سجل السعي - ${escapeHtml(currentActiveRoomForModal)}</title>
                     <style>
-                        body { font-family: 'Cairo', Tahoma, sans-serif; padding: 20px; direction: rtl; }
-                        h2, h4 { text-align: center; color: #0b3175; margin-bottom: 5px; }
-                        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-                        th, td { border: 1px solid #333; padding: 5px; text-align: center; font-size: 11px; }
-                        th { background-color: #0b3175; color: white; }
+                        @page { size: A4 landscape; margin: 10mm; }
+                        * { box-sizing: border-box; font-family: 'Cairo', Tahoma, sans-serif; }
+                        body { direction: rtl; color: #0f172a; margin: 0; padding: 8px; }
+                        .top-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0b3175; padding-bottom: 8px; margin-bottom: 10px; }
+                        .teacher-meta { font-size: 14px; font-weight: 900; color: #0b3175; }
+                        .room-meta { font-size: 13px; font-weight: 800; color: #334155; }
+                        table { width: 100%; border-collapse: collapse; font-size: 10px; }
+                        th, td { border: 1px solid #334155; padding: 4px; text-align: center; }
+                        th { background: #0b3175; color: #fff; font-weight: 800; }
+                        .th-f1 { background: #1d4ed8; }
+                        .th-mid { background: #6d28d9; }
+                        .th-f2 { background: #0f766e; }
+                        .st-name-cell { text-align: right; font-weight: 800; min-width: 120px; }
+                        .saei-col { font-weight: 900; background: #f0f9ff; }
+                        .section-summary { margin-top: 12px; display: flex; justify-content: space-between; gap: 10px; border: 2px solid #0b3175; border-radius: 8px; padding: 8px 12px; background: #f8fafc; font-size: 12px; font-weight: 800; }
+                        .summary-note { font-size: 10px; color: #64748b; margin-top: 4px; text-align: left; }
                     </style>
                 </head>
                 <body>
-                    <h2>${roomTitle}</h2>
-                    <h4>${teacherSub}</h4>
-                    ${tableHTML}
+                    <div class="top-header">
+                        <div class="teacher-meta">المدرس: ${escapeHtml(teacherProfile.name)} &nbsp;|&nbsp; المادة: ${escapeHtml(teacherProfile.subject)}</div>
+                        <div class="room-meta">الشعبة / القاعة: ${escapeHtml(currentActiveRoomForModal)} &nbsp;|&nbsp; سجل السعي</div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th rowspan="2">ت</th>
+                                <th rowspan="2">اسم الطالب</th>
+                                <th colspan="7" class="th-f1">الفصل الأول</th>
+                                <th rowspan="2" class="th-mid">نصف السنة</th>
+                                <th colspan="7" class="th-f2">الفصل الثاني</th>
+                            </tr>
+                            <tr>
+                                <th class="th-f1">شفوي ١</th>
+                                <th class="th-f1">تحريري ١</th>
+                                <th class="th-f1">الشهر الأول</th>
+                                <th class="th-f1">شفوي ٢</th>
+                                <th class="th-f1">تحريري ٢</th>
+                                <th class="th-f1">الشهر الثاني</th>
+                                <th class="th-f1">السعي (ف ١)</th>
+                                <th class="th-f2">شفوي ١</th>
+                                <th class="th-f2">تحريري ١</th>
+                                <th class="th-f2">الشهر الأول</th>
+                                <th class="th-f2">شفوي ٢</th>
+                                <th class="th-f2">تحريري ٢</th>
+                                <th class="th-f2">الشهر الثاني</th>
+                                <th class="th-f2">السعي (ف ٢)</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rowsHtml}</tbody>
+                    </table>
+
+                    <div class="section-summary">
+                        <div>الشعبة: ${escapeHtml(currentActiveRoomForModal)}</div>
+                        <div>عدد الناجحين: ${stats.passedCount}</div>
+                        <div>عدد الراسبين: ${stats.failedCount}</div>
+                        <div>نسبة النجاح: ${stats.passRate}%</div>
+                    </div>
+                    <div class="summary-note">إحصائية السعي محسوبة للطلاب ذوي درجات السعي المسجلة (درجة النجاح ${passMark}).</div>
+
                     <script>
-                        window.onload = function() { window.print(); window.close(); }
+                        window.onload = function() {
+                            setTimeout(function() {
+                                window.print();
+                                window.close();
+                            }, 200);
+                        };
                     <\/script>
                 </body>
                 </html>
